@@ -25,7 +25,7 @@ void loop()
 {
     M5.update();
 
-    switch (BtnA.scan()) {
+    switch (BtnB.scan()) {
     case 1:
         keyboard.sendKey(LEFT_ARROW);
         break;
