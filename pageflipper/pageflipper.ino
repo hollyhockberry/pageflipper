@@ -7,6 +7,8 @@
 #include "HIDTypes.h"
 #include "HIDKeyboardTypes.h"
 
+#include "buttonex.h"
+
 namespace {
 
 BLEHIDDevice* _hid;
@@ -132,25 +134,33 @@ bool sendKey(uint8_t keycode)
     return true;
 }
 
-} //namespace
+ButtonEx BtnA(M5.BtnA);
+ButtonEx BtnB(M5.BtnB);
 
+} //namespace
 
 void setup()
 {
     M5.begin();
     xTaskCreate(taskentry, "server", 20000, NULL, 5, NULL);    
+
+    BtnA.begin();
+    BtnB.begin();
 }
 
 void loop()
 {
     M5.update();
 
-    if (M5.BtnA.wasPressed()) {
+    switch (BtnA.scan()) {
+    case 1:
         ::sendKey(LEFT_ARROW);
-    }
-
-    if (M5.BtnB.wasPressed()) {
+        break;
+    case 2:
         ::sendKey(RIGHT_ARROW);
-    }    
+        break;
+    default:
+        break;
+    }
 
 }
