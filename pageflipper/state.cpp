@@ -16,6 +16,7 @@ public:
         doExit();
     }
     State* loop() {
+        _presenter.loop();
         return doLoop();
     }
 protected:
@@ -87,6 +88,7 @@ void StateContext::begin()
 
     _btnForward.begin();
     _btnBackbard.begin();
+    _presenter.begin();
 
     const esp_sleep_wakeup_cause_t wakeup_reason = esp_sleep_get_wakeup_cause();
 
