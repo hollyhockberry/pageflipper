@@ -38,7 +38,7 @@ void ServerCallbacks::onDisconnect(BLEServer* pServer)
 
 void taskentry(void*)
 {
-    BLEDevice::init("HID_TRIAL");
+    BLEDevice::init("PAGE_FLIPPER");
 
     BLEServer* server = BLEDevice::createServer();
     server->setCallbacks(new ServerCallbacks());
