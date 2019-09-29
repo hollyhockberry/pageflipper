@@ -3,9 +3,11 @@
 #include "hogpkeyboard.h"
 #include "buttonex.h"
 #include "HIDKeyboardTypes.h"
+#include "presenter.h"
 
 class State
 {
+    IPresenter& _presenter;
 public:
     void enter() {
         doEnter();
@@ -21,7 +23,10 @@ protected:
     virtual void doExit() {}
     virtual State* doLoop() = 0;
 
-    State(){}
+    IPresenter& Presenter() {
+        return _presenter;
+    }
+    State(IPresenter& presenter) : _presenter(presenter) {}
 private:
     State(const State&);
     void operator=(const State&);
@@ -32,7 +37,7 @@ class StandbyState : public State
     static StandbyState* _instance;
 public:
     static State* Instance();
-    StandbyState();
+    StandbyState(IPresenter& presenter);
 protected:
     virtual void doEnter();
     virtual State* doLoop();
@@ -44,7 +49,7 @@ class AdvertisingState : public State
     HoGPKeyboard& _keyboard;
 public:
     static State* Instance();
-    AdvertisingState(HoGPKeyboard& keyboard);
+    AdvertisingState(IPresenter& presenter, HoGPKeyboard& keyboard);
 protected:
     virtual void doEnter();
     virtual State* doLoop();
@@ -58,23 +63,27 @@ class KeyboardState : public State
     ButtonEx& _btnBackbard;
 public:
     static State* Instance();
-    KeyboardState(HoGPKeyboard& keyboard, ButtonEx& btnForward, ButtonEx& btnBackward);
+    KeyboardState(IPresenter& presenter, HoGPKeyboard& keyboard, ButtonEx& btnForward, ButtonEx& btnBackward);
 protected:
+    virtual void doEnter();
     virtual State* doLoop();
 };
 
-StateContext::StateContext(HoGPKeyboard& keyboard, ButtonEx& btnForward, ButtonEx& btnBackward)
+StateContext::StateContext(HoGPKeyboard& keyboard,
+                           ButtonEx& btnForward, ButtonEx& btnBackward,
+                           IPresenter& presenter)
 : _state(NULL),
   _keyboard(keyboard),
-  _btnForward(btnForward), _btnBackbard(btnBackward)
+  _btnForward(btnForward), _btnBackbard(btnBackward),
+  _presenter(presenter)
 {
 }
 
 void StateContext::begin()
 {
-    new StandbyState();
-    new AdvertisingState(_keyboard);
-    new KeyboardState(_keyboard, _btnForward, _btnBackbard);
+    new StandbyState(_presenter);
+    new AdvertisingState(_presenter, _keyboard);
+    new KeyboardState(_presenter, _keyboard, _btnForward, _btnBackbard);
 
     _btnForward.begin();
     _btnBackbard.begin();
@@ -109,7 +118,8 @@ void StateContext::loop()
     }
 }
 
-StandbyState::StandbyState()
+StandbyState::StandbyState(IPresenter& presenter)
+: State(presenter)
 {
     _instance = this;
 }
@@ -123,7 +133,7 @@ State* StandbyState::Instance()
 
 void StandbyState::doEnter()
 {
-    M5.Axp.ScreenBreath(0);
+    Presenter().enterStandby();
 }
 
 State* StandbyState::doLoop()
@@ -136,8 +146,8 @@ State* StandbyState::doLoop()
     return this; // never reach
 }
 
-AdvertisingState::AdvertisingState(HoGPKeyboard& keyboard)
-: _keyboard(keyboard)
+AdvertisingState::AdvertisingState(IPresenter& presenter, HoGPKeyboard& keyboard)
+: State(presenter), _keyboard(keyboard)
 {
     _instance = this;
 }
@@ -151,7 +161,7 @@ State* AdvertisingState::Instance()
 
 void AdvertisingState::doEnter()
 {
-    M5.Axp.ScreenBreath(0);
+    Presenter().enterAdvertising();
     _keyboard.begin();
 }
 
@@ -162,8 +172,8 @@ State* AdvertisingState::doLoop()
     return this;
 }
 
-KeyboardState::KeyboardState(HoGPKeyboard& keyboard, ButtonEx& btnForward, ButtonEx& btnBackward)
-: _keyboard(keyboard), _btnForward(btnForward), _btnBackbard(btnBackward) {
+KeyboardState::KeyboardState(IPresenter& presenter, HoGPKeyboard& keyboard, ButtonEx& btnForward, ButtonEx& btnBackward)
+: State(presenter), _keyboard(keyboard), _btnForward(btnForward), _btnBackbard(btnBackward) {
     _instance = this;
 }
 
@@ -172,6 +182,11 @@ KeyboardState* KeyboardState::_instance = NULL;
 State* KeyboardState::Instance()
 {
     return _instance;
+}
+
+void KeyboardState::doEnter()
+{
+    Presenter().enterKeyboard();
 }
 
 State* KeyboardState::doLoop()
