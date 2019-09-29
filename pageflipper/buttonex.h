@@ -7,10 +7,12 @@ class ButtonEx
 {
     Button& _button;
     int _phase;
-    int _lastPeriod;
+    uint32_t _lastPeriod, _beginTime;
 public:
     void begin();
     int scan();
+
+    bool isReadyForSleep() const;
 
     ButtonEx(Button& button);
 private:
