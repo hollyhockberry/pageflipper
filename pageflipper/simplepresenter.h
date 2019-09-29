@@ -7,7 +7,7 @@ class SimplePresenter : public IPresenter
 {
 public:
     virtual void begin();
-    virtual void update();
+    virtual void loop();
 
     virtual void enterStandby();
     virtual void enterAdvertising();

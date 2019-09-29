@@ -5,7 +5,7 @@ class IPresenter
 {
 public:
     virtual void begin() = 0;
-    virtual void update() = 0;
+    virtual void loop() = 0;
 
     virtual void enterStandby() = 0;
     virtual void enterAdvertising() = 0;

@@ -5,7 +5,7 @@ void SimplePresenter::begin()
 {
 }
 
-void SimplePresenter::update()
+void SimplePresenter::loop()
 {
 }
 
