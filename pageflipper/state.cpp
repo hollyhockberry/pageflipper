@@ -104,7 +104,7 @@ void StateContext::loop()
 
     if (next != _state) {
         _state->exit();
-        next->exit();
+        next->enter();
         _state = next;
     }
 }
