@@ -2,38 +2,24 @@
 
 #include "hogpkeyboard.h"
 #include "buttonex.h"
-#include "HIDKeyboardTypes.h"
+#include "state.h"
 
 namespace {
 
 HoGPKeyboard keyboard;
 ButtonEx BtnA(M5.BtnA);
 ButtonEx BtnB(M5.BtnB);
+StateContext state(keyboard, BtnB, BtnA);
 
 } //namespace
 
 void setup()
 {
     M5.begin();
-
-    keyboard.begin();
-    BtnA.begin();
-    BtnB.begin();
+    state.begin();
 }
 
 void loop()
 {
-    M5.update();
-
-    switch (BtnB.scan()) {
-    case 1:
-        keyboard.sendKey(LEFT_ARROW);
-        break;
-    case 2:
-        keyboard.sendKey(RIGHT_ARROW);
-        break;
-    default:
-        break;
-    }
-
+    state.loop();
 }
