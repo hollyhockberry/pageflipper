@@ -7,10 +7,20 @@
 class State
 {
 public:
-    virtual void enter() {}
-    virtual void exit() {}
-    virtual State* loop() = 0;
+    void enter() {
+        doEnter();
+    }
+    void exit() {
+        doExit();
+    }
+    State* loop() {
+        return doLoop();
+    }
 protected:
+    virtual void doEnter() {}
+    virtual void doExit() {}
+    virtual State* doLoop() = 0;
+
     State(){}
 private:
     State(const State&);
@@ -22,9 +32,10 @@ class StandbyState : public State
     static StandbyState* _instance;
 public:
     static State* Instance();
-    virtual void enter();
-    virtual State* loop();
     StandbyState();
+protected:
+    virtual void doEnter();
+    virtual State* doLoop();
 };
 
 class AdvertisingState : public State
@@ -33,9 +44,10 @@ class AdvertisingState : public State
     HoGPKeyboard& _keyboard;
 public:
     static State* Instance();
-    virtual void enter();
-    virtual State* loop();
     AdvertisingState(HoGPKeyboard& keyboard);
+protected:
+    virtual void doEnter();
+    virtual State* doLoop();
 };
 
 class KeyboardState : public State
@@ -46,8 +58,9 @@ class KeyboardState : public State
     ButtonEx& _btnBackbard;
 public:
     static State* Instance();
-    virtual State* loop();
     KeyboardState(HoGPKeyboard& keyboard, ButtonEx& btnForward, ButtonEx& btnBackward);
+protected:
+    virtual State* doLoop();
 };
 
 StateContext::StateContext(HoGPKeyboard& keyboard, ButtonEx& btnForward, ButtonEx& btnBackward)
@@ -108,12 +121,12 @@ State* StandbyState::Instance()
     return _instance;
 }
 
-void StandbyState::enter()
+void StandbyState::doEnter()
 {
     M5.Axp.ScreenBreath(0);
 }
 
-State* StandbyState::loop()
+State* StandbyState::doLoop()
 {
     // enter sleep
     pinMode(GPIO_NUM_37, INPUT_PULLUP);
@@ -136,13 +149,13 @@ State* AdvertisingState::Instance()
     return _instance;
 }
 
-void AdvertisingState::enter()
+void AdvertisingState::doEnter()
 {
     M5.Axp.ScreenBreath(0);
     _keyboard.begin();
 }
 
-State* AdvertisingState::loop()
+State* AdvertisingState::doLoop()
 {
     if (_keyboard.isConnected())
         return KeyboardState::Instance();
@@ -161,7 +174,7 @@ State* KeyboardState::Instance()
     return _instance;
 }
 
-State* KeyboardState::loop()
+State* KeyboardState::doLoop()
 {
     if (!_keyboard.isConnected())
         return AdvertisingState::Instance();
