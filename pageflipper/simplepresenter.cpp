@@ -51,12 +51,25 @@ void SimplePresenter::drawBatteryLevel(bool force)
     M5.Lcd.printf("%3d%%", p);
 }
 
+void SimplePresenter::showLCD(bool show)
+{
+    M5.Axp.ScreenBreath(show ? _lcdBrightness : 0);
+}
+
+void SimplePresenter::ScreenBreath(uint8_t brightness)
+{
+    _lcdBrightness = brightness;
+    M5.Axp.ScreenBreath(brightness);
+}
+
 void SimplePresenter::enterStandby()
 {
     _isShowBatteryLevel = false;
-    M5.Axp.ScreenBreath(0);
+    ScreenBreath(0);
     turnOffLED();
 }
+
+namespace {
 
 void drawCenteringString(const char* str)
 {
@@ -66,9 +79,11 @@ void drawCenteringString(const char* str)
     M5.Lcd.printf(str);
 }
 
+} //namespace
+
 void SimplePresenter::enterAdvertising()
 {
-    M5.Axp.ScreenBreath(12);
+    ScreenBreath(12);
     M5.Lcd.fillScreen(WHITE);
     M5.Lcd.setTextColor(RED, WHITE);
     drawCenteringString("DISCONNECTED");
@@ -82,7 +97,7 @@ void SimplePresenter::enterAdvertising()
 
 void SimplePresenter::enterKeyboard()
 {
-    M5.Axp.ScreenBreath(10);
+    ScreenBreath(10);
     M5.Lcd.fillScreen(BLACK);
 
     M5.Lcd.setTextColor(WHITE, BLACK);

@@ -62,12 +62,16 @@ class KeyboardState : public State
     HoGPKeyboard& _keyboard;
     ButtonEx& _btnForward;
     ButtonEx& _btnBackbard;
+    bool _isShow;
+    uint32_t _offTimer;
 public:
     static State* Instance();
     KeyboardState(IPresenter& presenter, HoGPKeyboard& keyboard, ButtonEx& btnForward, ButtonEx& btnBackward);
 protected:
     virtual void doEnter();
     virtual State* doLoop();
+private:
+    void checkLcdTimer();    
 };
 
 StateContext::StateContext(HoGPKeyboard& keyboard,
@@ -111,6 +115,7 @@ void StateContext::begin()
 
 void StateContext::loop()
 {
+    ButtonEx::update();
     State* next = _state->loop();
 
     if (next != _state) {
@@ -186,17 +191,21 @@ State* KeyboardState::Instance()
     return _instance;
 }
 
+namespace {
+const uint32_t LCD_OFF_INTERVAL_MS = 10000;
+} //namespace
+
 void KeyboardState::doEnter()
 {
     Presenter().enterKeyboard();
+    _isShow = true;
+    _offTimer = ::millis() + LCD_OFF_INTERVAL_MS;
 }
 
 State* KeyboardState::doLoop()
 {
     if (!_keyboard.isConnected())
         return AdvertisingState::Instance();
-
-    ButtonEx::update();
 
     switch (_btnForward.scan()) {
     case 1:
@@ -209,8 +218,23 @@ State* KeyboardState::doLoop()
         break;
     }
 
+    checkLcdTimer();
+
     if (_btnForward.isReadyForSleep() && _btnBackbard.isReadyForSleep())
         return StandbyState::Instance();
 
     return this;
+}
+
+void KeyboardState::checkLcdTimer()
+{
+    const uint32_t now = ::millis();
+    if (_btnBackbard.scan() > 0) {
+        _offTimer = _isShow ? now : (now + LCD_OFF_INTERVAL_MS);
+    }
+    const bool show = _offTimer > now;
+    if (show != _isShow) {
+        _isShow = show;
+        Presenter().showLCD(_isShow);
+    }
 }
