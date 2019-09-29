@@ -116,7 +116,12 @@ void StateContext::begin()
 void StateContext::loop()
 {
     ButtonEx::update();
-    State* next = _state->loop();
+
+    State* next = NULL;
+    if (_btnForward.isReadyForSleep() && _btnBackbard.isReadyForSleep())
+        next = StandbyState::Instance();
+    else
+        next = _state->loop();
 
     if (next != _state) {
         _state->exit();
@@ -219,9 +224,6 @@ State* KeyboardState::doLoop()
     }
 
     checkLcdTimer();
-
-    if (_btnForward.isReadyForSleep() && _btnBackbard.isReadyForSleep())
-        return StandbyState::Instance();
 
     return this;
 }
