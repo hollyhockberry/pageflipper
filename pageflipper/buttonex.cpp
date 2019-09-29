@@ -17,6 +17,11 @@ ButtonEx::ButtonEx(Button& button)
 {
 }
 
+void ButtonEx::update()
+{
+    M5.update();
+}
+
 void ButtonEx::begin()
 {
     _phase = IDLE;

@@ -166,7 +166,7 @@ State* KeyboardState::loop()
     if (!_keyboard.isConnected())
         return AdvertisingState::Instance();
 
-    M5.update();
+    ButtonEx::update();
 
     switch (_btnForward.scan()) {
     case 1:

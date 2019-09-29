@@ -12,6 +12,7 @@ public:
     void begin();
     int scan();
 
+    static void update();
     bool isReadyForSleep() const;
 
     ButtonEx(Button& button);
