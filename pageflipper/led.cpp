@@ -53,15 +53,18 @@ void LED::update()
 void LED::turnOn()
 {
     _led.interval = 0;
+    update();
 }
 
 void LED::turnOff()
 {
     _led.interval = -1;
+    update();
 }
 
 void LED::blink(uint32_t interval_ms)
 {
     _led.on = false;
     _led.interval = _led.counter = interval_ms / 2 / TIKER_INTERVAL_MS;
+    update();
 }

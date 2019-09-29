@@ -66,7 +66,7 @@ void SimplePresenter::enterStandby()
 {
     _isShowBatteryLevel = false;
     ScreenBreath(0);
-    turnOffLED();
+    _led.turnOff();
 }
 
 namespace {
